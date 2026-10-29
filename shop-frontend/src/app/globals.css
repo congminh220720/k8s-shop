@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-cream: #fffbf4;
+  --color-ink: #1a1a2e;
+  --color-muted: #4a4a6a;
+  --color-teal: #1aa39a;
+  --color-honey: #f5a623;
+  --font-sans: var(--font-dm-sans), sans-serif;
+  --font-display: var(--font-fraunces), serif;
+}
+
+@utility btn-primary {
+  @apply inline-flex items-center justify-center rounded-full bg-teal px-9 py-4 font-semibold text-white shadow-[0_4px_24px_rgba(26,163,154,0.35)] transition hover:brightness-110 disabled:opacity-50;
+}
+
+@utility btn-outline {
+  @apply inline-flex items-center justify-center rounded-full border-2 border-teal px-9 py-4 font-semibold text-teal transition hover:bg-teal/10;
+}
+
+@utility eyebrow {
+  @apply text-xs font-bold tracking-[1.8px] text-honey uppercase;
+}
+
+@utility field {
+  @apply w-full rounded-xl border-[1.5px] border-teal/20 bg-cream px-4 py-3.5 text-[15px] text-ink outline-none transition focus:border-teal;
+}
+
+@utility card {
+  @apply rounded-[18px] border border-ink/5 bg-white shadow-[0_2px_20px_rgba(26,26,46,0.06)];
+}

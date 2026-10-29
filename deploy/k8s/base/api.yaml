@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shop-api-config
+data:
+  DB_HOST: "127.0.0.1"
+  DB_PORT: "5432"
+  DB_NAME: "shop"
+  DB_SSL: "false"
+  DB_POOL_MAX: "10"
+  DB_RUN_MIGRATIONS: "true"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shop-api
+  labels: { app: shop-api }
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: shop-api }
+  template:
+    metadata:
+      labels: { app: shop-api }
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+      containers:
+        - name: api
+          image: shop-api
+          ports:
+            - { name: http, containerPort: 3000 }
+          envFrom:
+            - configMapRef: { name: shop-api-config }
+            # Created out-of-band (not in git): keys DB_USER, DB_PASSWORD
+            - secretRef: { name: shop-api-db }
+          readinessProbe:
+            httpGet: { path: /api/readyz, port: http }
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /api/healthz, port: http }
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            requests: { cpu: 100m, memory: 192Mi }
+            limits: { memory: 384Mi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: ["ALL"] }
+          volumeMounts:
+            - { name: next-cache, mountPath: /app/.next/cache }
+      volumes:
+        - name: next-cache
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: shop-api
+spec:
+  selector: { app: shop-api }
+  ports:
+    - { name: http, port: 80, targetPort: http }

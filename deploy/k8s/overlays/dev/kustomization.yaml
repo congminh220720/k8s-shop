@@ -1,0 +1,28 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: shop-dev
+resources:
+  - ../../base
+
+# TODO: replace REGION / PROJECT_ID / REPO with your Artifact Registry values.
+images:
+  - name: shop-api
+    newName: REGION-docker.pkg.dev/PROJECT_ID/REPO/shop-api
+    newTag: "0.1.0"
+  - name: shop-frontend
+    newName: REGION-docker.pkg.dev/PROJECT_ID/REPO/shop-frontend
+    newTag: "0.1.0"
+
+replicas:
+  - name: shop-api
+    count: 1
+  - name: shop-frontend
+    count: 1
+
+patches:
+  # TODO: point to Cloud SQL (private IP, or keep 127.0.0.1 if you add the Cloud SQL Auth Proxy sidecar).
+  - target: { kind: ConfigMap, name: shop-api-config }
+    patch: |-
+      - op: replace
+        path: /data/DB_HOST
+        value: "127.0.0.1"
